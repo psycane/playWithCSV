@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>UserBody</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- JavaScript -->
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#logout").click(function(e) {
+                e.preventDefault();
+                window.open("logout", "_self");
+            });
+
+            $("#browse_button").click(function() {
+                $("#uploadFile").click();
+            });
+
+            $("#uploadFile").change(function(e) {
+                var $this = $(this);
+                $("#filename").html($this.val().split('\\').pop());
+            });
+
+            $("#upload_button").click(function(e) {
+                e.preventDefault();
+                var uploadFile = $('#uploadFile');
+                var ext = $("input#uploadFile").val().split(".").pop().toLowerCase();
+
+
+                if ($.inArray(ext, ["csv"]) === -1) {
+                    $("#alert_message").html("Select a CSV file to upload!");
+                    $("#alert_message").slideDown(500);
+                    $("#alert_message").delay(3000).slideUp(500);
+                    return false;
+                }
+                $(".modal-title").html($("#uploadFile").val().split('\\').pop());
+                return true;
+            });
+
+            $("#select_value_form").submit(function(e) {
+                e.preventDefault();
+                var formdata = new FormData();
+                formdata.append("uploadFile", $("#uploadFile")[0].files[0]);
+                var other_data = $('#select_value_form').serializeArray();
+                $.each(other_data, function(key, input) {
+                    formdata.append(input.name, input.value);
+                });
+                $.ajax({
+                    url: "/upload",
+                    type: "POST",
+                    dataType: "json",
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: formdata,
+                    success: function(result) {
+                        if (result.message == "OK") {
+                            $(".close").click();
+                            $("#alert_message").html("Data Stored Successfully!");
+                            $("#alert_message").slideDown(500);
+                            $("#alert_message").delay(3000).slideUp(500);
+                        }
+                    },
+                    error: function(result) {
+                        console.error(result);
+                        $(".close").click();
+                        $("#alert_message").html("Something went wrong!");
+                        $("#alert_message").slideDown(500);
+                        $("#alert_message").delay(3000).slideUp(500);
+                    }
+                });
+            });
+
+            $("#view_button").click(function(e) {
+                e.preventDefault();
+                $('#view_data').html("");
+                $.ajax({
+                    url: "/fetch_data",
+                    type: "POST",
+                    dataType: "json",
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function(result) {
+                        if (result.data) {
+                            data = result.data;
+                            console.log(data);
+                            $('#view_data').append('<div class="col-md-3"><h4>Email</h4><ul id="emaillist"></ul></div>');
+                            $('#view_data').append('<div class="col-md-3"><h4>Name</h4><ul id="namelist"></ul></div>');
+                            $('#view_data').append('<div class="col-md-3"><h4>Contact Number</h4><ul id="phone_nolist"></ul></div>');
+                            $('#view_data').append('<div class="col-md-3"><h4>Location</h4><ul id="locationlist"></ul></div>');
+                            keys=Object.keys(data[0]);
+                            for (i = 0; i < data.length; i++) {
+                                for (cnt = 0; cnt < 4; cnt++) {
+                                    if(data[i][keys[cnt]])
+                                        $("#" + keys[cnt] + "list").append("<li>" + data[i][keys[cnt]] + "</li>");
+                                    else
+                                        $("#" + keys[cnt] + "list").append("<li>-</li>");
+                                }
+                            }
+                            console.log(data.length);
+                            console.log(Object.keys(data[0]).length);
+                        } else {
+                            $(".close").click();
+                            $("#alert_message").html("No data to show!");
+                            $("#alert_message").slideDown(500);
+                            $("#alert_message").delay(3000).slideUp(500);
+                        }
+
+                    },
+                    error: function(result) {
+                        console.error(result);
+                        $(".close").click();
+                        $("#alert_message").html("Something went wrong!");
+                        $("#alert_message").slideDown(500);
+                        $("#alert_message").delay(3000).slideUp(500);
+                    }
+                });
+            });
+
+            $("#truncate_button").click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "/truncate",
+                    type: "POST",
+                    dataType: "json",
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function(result) {
+                        console.log(result.message);
+                        $('#view_data').html("");
+                        $("#alert_message").html("Data truncate successful!");
+                        $("#alert_message").slideDown(500);
+                        $("#alert_message").delay(3000).slideUp(500);
+                    },
+                    error: function(result) {
+                        console.error(result);
+                        $("#alert_message").html("Something went wrong!");
+                        $("#alert_message").slideDown(500);
+                        $("#alert_message").delay(3000).slideUp(500);
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- CSS -->
+    <style type="text/css">
+        body {
+            background-color: #FFFFE0;
+            background-image: url(../static/img/background.jpg);
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 100%;
+        }
+
+        h1,
+        h3,
+        p,
+        ul,
+        h4 {
+            color: #FFFFFF;
+        }
+
+        h3,
+        p {
+            margin: 10px;
+            color: #FFFFFF;
+        }
+
+        button {
+            text-align: center;
+            width: 100px;
+            margin: 10px;
+        }
+        
+        #logout {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #browse_button:hover {
+            background: #666;
+            cursor: pointer;
+        }
+
+        .alert_parent {
+            text-align: center;
+            position: fixed;
+            width: 100%;
+        }
+
+        .alert {
+            width: 30%;
+            margin: 10px auto;
+            z-index: 1;
+            display: none;
+        }
+
+        .modal-content {
+            background-color: #FFFFFF;
+            border: 1px solid #888;
+            width: 100%;
+        }
+
+        .modal-title {
+            color: #000000;
+        }
+
+        .close {
+            position: relative;
+            margin-top: 0;
+            margin-right: 0;
+            width: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: red;
+            cursor: pointer;
+        }
+        
+        label {
+            margin: 10px;
+        }
+
+        #view_data {
+            position: relative;
+            margin-top: 50px;
+        }
+
+        ul{
+            list-style-type:square;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="alert_parent">
+        <div class="alert alert-info" id="alert_message">
+        </div>
+    </div>
+    <div class="container">
+        <div class="page-header">
+            <h1>Welcome!</h1>
+        </div>
+        <div>
+            <h3> Upload a CSV file: </h3>
+            <button type="button" id="logout" class="btn btn-danger">Logout</button>
+            <form enctype="multipart/form-data" method="post" id="upload_form" name="upload_form">
+                <input type="file" class="hidden" id="uploadFile" />
+                <button id="browse_button" class="btn btn-primary" type="button">Select</button>
+                <button id="upload_button" class="btn btn-success" type="button" data-toggle="modal" data-target="#upload-modal">Upload</button>
+                <button id="view_button" class="btn btn-warning" type="button">View Data</button>
+                <button id="truncate_button" class="btn btn-danger" type="button">Truncate</button>
+                <br>
+                <p id="filename">No File Selected!</p>
+            </form>
+        </div>
+        <div class="modal fade" id="upload-modal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">X</button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <form enctype="multipart/form-data" method="post" id="select_value_form" name="select_value_form">
+                            <input id="email" type="checkbox" name="email" value="Email" checked disabled>
+                            <label for="email">Email</label>
+                            <input id="name" type="checkbox" name="name" value="Name">
+                            <label for="name">Name</label>
+                            <input id="phoneno" type="checkbox" name="phoneno" value="Phone No">
+                            <label for="phoneno">Contact Number</label>
+                            <input id="location" type="checkbox" name="location" value="Location">
+                            <label for="location">Location</label>
+                            <br>
+                            <br>
+                            <button type="submit" id="upload_submit" class="btn btn-success">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="view_data">
+        </div>
+    </div>
+</body>
+
+</html>
