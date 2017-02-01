@@ -1,5 +1,5 @@
-create database ikarus;
-use ikarus;
+create database playWithCSV;
+use playWithCSV;
 create table users(
 	id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
 	name VARCHAR(255) NOT NULL,

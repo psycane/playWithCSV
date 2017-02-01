@@ -13,7 +13,7 @@ app.secret_key = "\xc2S\xbdE%u\x9cP2Z\xa8ZrsY\xe2\x99\x95\xa6\xe5\xc3\xd0\xe9\x8
 cnx = {'host': '0.0.0.0',
        'username': 'root',
        'password': 'root',
-       'db': 'ikarus'}
+       'db': 'playWithCSV'}
 
 conn = MySQLdb.connect(cnx['host'], cnx['username'],
                        cnx['password'], cnx['db'])
